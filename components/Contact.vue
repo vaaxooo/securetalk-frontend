@@ -60,6 +60,7 @@ export default {
 	methods: {
 		async openChat(dialogId) {
 			this.$router.push({ path: '/dialogs', query: { chatId: dialogId } });
+			this.$emit('hideContacts');
 		},
 		updateChatId() {
 			this.chatId = this.queryParams.chatId || null;

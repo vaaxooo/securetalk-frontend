@@ -3,7 +3,7 @@
         <div class="chat-ui d-flex align-items-stretch" id="chatcontent">
             <!-- Left Panel -->
             <div id="listUserSearch" class="navbar-expand-lg">
-                <div class="chat-ui-offcanvas offcanvas offcanvas-start d-flex flex-column h-100" tabindex="-1" id="navbarOffcanvasLg" aria-labelledby="navbarOffcanvasLgLabel">
+  <div class="chat-ui-offcanvas offcanvas offcanvas-start d-flex flex-column h-100" tabindex="-1" :id="offcanvasId" :aria-labelledby="offcanvasLabelId" :style="offcanvasStyle" :aria-modal="isModal ? 'true' : 'false'" :role="isModal ? 'dialog' : ''">
                     <!-- Header (Left) -->
                     <div class="chat-ui-header d-flex align-items-center flex-shrink-0 p-3">
                          <a href="/start" class="link-dark" title="Return to Start"><i class="bi bi-house-door"></i></a>&nbsp;|&nbsp;  
@@ -77,7 +77,7 @@
                         <a href="#divstart" style="display: none" class="list-group-item list-group-item-action p-0" aria-current="true" id="list-divstart-list" data-isblocked="0" data-bs-toggle="pill" role="tab" aria-controls="v-pills-home" aria-selected="true" data-bs-target="#divstart">
                             <div class="d-flex align-items-center p-3"></div>
                         </a>
-                        <Contact v-for="(dialog, index) in dialogs" :key="index" :dialog="dialog" />
+                        <Contact v-for="(dialog, index) in dialogs" :key="index" :dialog="dialog" @hideContacts="hideContacts" />
                     </div>
 
                     <div class="list list-group list-group-full-flush overflow-y-auto" role="tablist" aria-orientation="vertical" id="myList" style="display: block;" v-else>
@@ -165,6 +165,12 @@ export default {
             chatIsOpen: false,
             dropdownMore: false,
             modal: '',
+
+            offcanvasId: 'navbarOffcanvasLg',
+            offcanvasLabelId: 'navbarOffcanvasLgLabel',
+            offcanvasStyle: { visibility: 'visible' },
+            originalOffcanvasStyle: { visibility: 'visible' },
+            isModal: true // Замените на false, если это не модальное окно
         }
     },
     created() {
@@ -177,6 +183,9 @@ export default {
         setInterval(() => {
             this.fetchDialogs()
         }, 10000)
+    },
+    mounted() {
+        this.originalOffcanvasStyle = { ...this.offcanvasStyle };
     },
     computed: {
         user() {
@@ -196,6 +205,10 @@ export default {
         }
     },
     methods: {
+        hideContacts() {
+            this.offcanvasStyle = this.originalOffcanvasStyle;
+        },
+
         handleModalClose() {
             this.modal = '';
         },
