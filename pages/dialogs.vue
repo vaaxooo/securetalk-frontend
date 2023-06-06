@@ -155,7 +155,7 @@
 
 <script>
 export default {
-    auth: true,
+    auth: false,
     layout: 'dialogs',
     data() {
         return {
