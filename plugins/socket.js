@@ -2,7 +2,7 @@ import io from 'socket.io-client'
 
 export default ({ app, store }, inject) => {
     // Connect to the server-side Socket.IO endpoint
-    const socket = io('http://localhost:3000')
+    const socket = io(process.env.API)
 
     socket.on('connect', (data) => {
         socket.emit('socket-connected', { user: store.state.user})
