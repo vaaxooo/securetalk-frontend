@@ -72,43 +72,44 @@ export default {
   },
   methods: {
     ...mapActions(['setUser']),
-    async authenticateMetaMask() {
-      try {
-        // Check if MetaMask is installed
-        if (!this.$web3) {
-          console.error('MetaMask is not installed or not enabled')
-          return
-        }
+async authenticateMetaMask() {
+  try {
+    // Check if MetaMask is installed
+    if (!window.ethereum) {
+      console.error('MetaMask is not installed or not enabled')
+      return
+    }
 
-        // Request authorization from the user
-        const accounts = await this.$web3.eth.requestAccounts()
+    // Request authorization from the user
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
 
-        // Get the authorized account address
-        const address = accounts[0]
+    // Get the authorized account address
+    const address = accounts[0]
 
-        // Perform additional actions after successful authorization
-        console.log('Successfully authenticated with MetaMask')
+    // Perform additional actions after successful authorization
+    console.log('Successfully authenticated with MetaMask')
 
-        this.$socket.emit('account:login', this.$encryptHash({ address: address }))
-        this.$socket.on('account:login', (data) => {
-          let response = this.$decryptHash(data)
-          if (response.success) {
-            this.$socket.emit('account:setOnline', this.$encryptHash({ address: address }))
-            response.user.is_online = true
-            this.setUser(response.user)
+    this.$socket.emit('account:login', this.$encryptHash({ address: address }))
+    this.$socket.on('account:login', (data) => {
+      let response = this.$decryptHash(data)
+      if (response.success) {
+        this.$socket.emit('account:setOnline', this.$encryptHash({ address: address }))
+        response.user.is_online = true
+        this.setUser(response.user)
 
-            localStorage.setItem('user', this.$encryptHash(JSON.stringify(response.user)))
-            this.$router.push('/dialogs')
-          } else {
-            this.$toast.error(response.message)
-          }
-        })
-        return
-      } catch (error) {
-        alert("You need to connect your wallet to continue.")
-        console.error('Failed to authenticate with MetaMask')
+        localStorage.setItem('user', this.$encryptHash(JSON.stringify(response.user)))
+        this.$router.push('/dialogs')
+      } else {
+        this.$toast.error(response.message)
       }
-    },
+    })
+    return
+  } catch (error) {
+    alert("You need to connect your wallet to continue.")
+    console.error('Failed to authenticate with MetaMask')
+  }
+},
+
     async getAccounts() {
       try {
         const accounts = await this.$web3.eth.getAccounts()
