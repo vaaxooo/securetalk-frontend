@@ -1,8 +1,10 @@
 <template>
-    <Nuxt v-if="!loading" />
+  <Nuxt v-if="!loading" />
 </template>
+
 <script>
 import { mapActions } from 'vuex'
+import Web3 from 'web3'
 
 export default {
   data() {
@@ -11,45 +13,64 @@ export default {
       loading: true
     }
   },
-  async mounted() {
-    if(!localStorage.getItem('user')) {
-      this.$router.push('/')
-      return
-    }
 
-    const user = JSON.parse(this.$decryptHash(localStorage.getItem('user')))
+  created() {
+    this.loadData()
+  },
 
-    if (!user) {
-      this.$router.push('/')
-      return
-    }
+  methods: {
+    ...mapActions(['setUser']),
 
-    try {
-      const accounts = await this.$web3.eth.getAccounts()
+    async loadData() {
+      const user = JSON.parse(this.$decryptHash(localStorage.getItem('user')))
 
-      if (accounts.length < 1 || user.address !== accounts[0]) {
-        localStorage.removeItem('user')
-        this.$router.push('/')
+      if (!user) {
+        this.redirectToHome()
         return
       }
 
-      const balance = await this.$web3.eth.getBalance(user.address)
-      user.balance = this.$web3.utils.fromWei(balance, 'ether')
+      try {
+        let web3Provider
 
-        const transactions = await this.$web3.eth.getTransactionCount(user.address)
+        if (typeof window.ethereum !== 'undefined') {
+          // Web3 провайдер доступен
+          web3Provider = window.ethereum
+          // Запрашиваем разрешение на доступ к аккаунтам пользователя
+          await window.ethereum.enable()
+        } else {
+          // Web3 провайдер не доступен
+          // Обработка ситуации, когда Web3 не поддерживается на мобильных устройствах
+          // Предоставьте альтернативные способы взаимодействия с Ethereum-сетью на мобильных устройствах
+        }
+
+        const web3 = new Web3(web3Provider)
+        const accounts = await web3.eth.getAccounts()
+
+        if (accounts.length < 1 || user.address !== accounts[0]) {
+          localStorage.removeItem('user')
+          this.redirectToHome()
+          return
+        }
+
+        const balance = await web3.eth.getBalance(user.address)
+        const transactions = await web3.eth.getTransactionCount(user.address)
+
+        user.balance = web3.utils.fromWei(balance, 'ether')
         user.transactions = transactions
 
-      this.setUser(user)
-      this.accounts = accounts
-    } catch (error) {
-      console.error('Failed to load accounts or balance:', error)
-      // Handle the error appropriately
-    } finally {
-      this.loading = false
+        this.setUser(user)
+        this.accounts = accounts
+      } catch (error) {
+        console.error('Failed to load accounts or balance:', error)
+        // Handle the error appropriately
+      } finally {
+        this.loading = false
+      }
+    },
+
+    redirectToHome() {
+      this.$router.push('/')
     }
-  },
-  methods: {
-    ...mapActions(['setUser']),
   }
 }
 </script>
