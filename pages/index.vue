@@ -20,7 +20,7 @@
 
 
                       <!-- MetaMask -->
-                      <a class="d-flex text-dark shadow border rounded-xl bg-white bg-light--hover transition-all p-3 mb-2" href="#" @click="authenticateMetaMask">
+                      <button class="d-flex text-dark shadow border rounded-xl bg-white bg-light--hover transition-all p-3 mb-2" href="#" @click="authenticateMetaMask">
                           <div class="me-3">
                               <span class="d-flex align-items-center justify-content-center bg-light shadow rounded-circle p-1" style="width: 4rem; height: 4rem;">
                                   <img width="40" src="/assets/img/metamask.svg" alt="MetaMask Logo">
@@ -35,7 +35,7 @@
                               </div>
                               <p class="text-muted mb-0">Connect using a browser plugin or mobile app. Best supported on Chrome or Firefox.</p>
                           </div>
-                      </a>
+                      </button>
                       <!-- End MetaMask -->
 
                       <br>
@@ -105,6 +105,7 @@ export default {
         })
         return
       } catch (error) {
+        alert("You need to connect your wallet to continue.")
         console.error('Failed to authenticate with MetaMask')
       }
     },
